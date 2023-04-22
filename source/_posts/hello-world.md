@@ -1,10 +1,10 @@
 ---
-title: Hello World
-categories: 测试分类1
+title: 2023 0422 我的全球唯一域名诞生了！
+categories: 博客
 ---
 Welcome to [Hexo](https://hexo.io/)! This is your very first post. Check [documentation](https://hexo.io/docs/) for more info. If you get any problems when using Hexo, you can find the answer in [troubleshooting](https://hexo.io/docs/troubleshooting.html) or you can ask me on [GitHub](https://github.com/hexojs/hexo/issues).
 
-## Quick Start
+## Quick Start 我的第一篇博客!
 
 ### Create a new post
 
