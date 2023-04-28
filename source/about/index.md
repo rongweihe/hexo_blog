@@ -21,9 +21,9 @@ layout: about
 - #视频号：程序员贺同学 
 - 平时不闲聊，我的免费知识星球，分享日常思考，可免费提问 https://t.zsxq.com/0bZvOPT0C
 
-## 优秀圈子 & 技术课程推荐
+## 【优秀圈子 & 技术课程推荐】
 - [点击这里，开启新的世界](https://jnvsh9w7fs.feishu.cn/docx/GxPLdlGAnovtWDxWC8qcR0TdnGg)
 
-## 座右铭
+## 【座右铭】
 - 空无一物，无限进步
 - 真诚无敌，极致利他
