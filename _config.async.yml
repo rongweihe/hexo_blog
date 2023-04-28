@@ -54,7 +54,7 @@ top_bars:
     - title: 分类
       url: /categories/
     - title: 关于
-      url: /categories/
+      url: /about/
 
 banner:
     index:
@@ -62,6 +62,18 @@ banner:
         bgurl: //cdn.moji.com/websrc/video/autumn20190924.mp4
         bannerTitle: 流水不争先，<br>争的是滔滔不绝。
         bannerText: Hi my new friend!
+
+links:
+  - name: 白云苍狗
+    url: //www.imalun.com/
+    image: //www.imalun.com/images/avatar.jpg
+    desc: 醒，亦在人间；梦，亦在人间
+
+about:
+  title: 程序员贺同学        # 标题
+  introduction: # 个人简单描述
+  blog:         # 博客信息
+  privacy:      # 隐私权说明
 
 footer:
   powered:
