@@ -1,0 +1,954 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+<meta name="x5-fullscreen" content="true">
+<meta name="full-screen" content="yes">
+<meta name="theme-color" content="#317EFB" />
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=0" name="viewport">
+<meta name="description" content="Golang 并发编程实践总结目录  Golang 并发编程实践总结 深⼊理解GMP模型 Channel是什么 Select的用法 使用sync包 WaitGroup Pool 常见内存泄露及注意事项    深⼊理解GMP模型【思考🤔】⾸先思考⼀个问题为什么需要协程？ 其实答案也很明显：在多进程和多线程时代，CPU 内核负责调度，为系统提供并发处理能⼒，但也存在⼀些缺点：  资源消耗⾼：进程和线">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Golang 并发编程实战总结">
+<meta property="og:url" content="https://herongwei.me/2025/03/28/Golang-%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B%E5%AE%9E%E6%88%98%E6%80%BB%E7%BB%93/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="Golang 并发编程实践总结目录  Golang 并发编程实践总结 深⼊理解GMP模型 Channel是什么 Select的用法 使用sync包 WaitGroup Pool 常见内存泄露及注意事项    深⼊理解GMP模型【思考🤔】⾸先思考⼀个问题为什么需要协程？ 其实答案也很明显：在多进程和多线程时代，CPU 内核负责调度，为系统提供并发处理能⼒，但也存在⼀些缺点：  资源消耗⾼：进程和线">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2025-03-28T08:12:34.000Z">
+<meta property="article:modified_time" content="2025-03-28T08:16:07.392Z">
+<meta property="article:author" content="贺同学">
+<meta property="article:tag" content="golang">
+<meta name="twitter:card" content="summary">
+
+
+<title >Golang 并发编程实战总结</title>
+
+<!-- Favicon -->
+
+    <link href='/log.svg?v=2.0.8' rel='icon' type='image/png' sizes='16x16' ></link>
+
+
+    <link href='/log.svg?v=2.0.8' rel='icon' type='image/png' sizes='32x32' ></link>
+
+
+    <link href='/apple-touch-icon.png?v=2.0.8' rel='apple-touch-icon' sizes='180x180' ></link>
+
+
+    <link href='/site.webmanifest' rel='manifest' ></link>
+
+
+<!-- Plugin -->
+
+
+
+
+    
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/hexo-theme-async@2.0.8/source/css/plugins/bootstrap.row.css">
+
+    
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/locomotive-scroll@4.1.4/dist/locomotive-scroll.min.css">
+
+    
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui@4.0/dist/fancybox.css">
+
+    
+    
+
+
+
+
+<!-- Icon -->
+
+    
+<link rel="stylesheet" href="/css/plugins/font-awesome.min.css">
+
+
+
+
+<!-- Variable -->
+<script>window.ASYNC_CONFIG = {"hostname":"herongwei.me","author":"贺同学","root":"/","typed_text":["Backend Developer"],"theme_version":"2.0.8","theme":{"switch":true,"default":"style-light","theme":"async"},"favicon":{"logo":"log.svg","icon16":"log.svg","icon32":"log.svg","appleTouchIcon":"apple-touch-icon.png","webmanifest":"/site.webmanifest","visibilitychange":true,"hidden":"failure.ico","showText":"(/≧▽≦/)咦！又好了！","hideText":"(●—●)喔哟，崩溃啦！"},"i18n":{"placeholder":"Searching...","empty":"We didn't find any results for the search: ${query}.","hits":"${hits} results found","hits_time":"${hits} results found in ${time} ms","author":"Post author: ","copyright_link":"Post link: ","copyright_license_title":"Copyright Notice: ","copyright_license_content":"All articles in this blog are licensed under undefined unless otherwise stated.","copy_success":"Copied","copy_failure":"Copy failed","open_read_mode":"Enter reading mode","exit_read_mode":"Exit reading mode","notice_outdate_message":"It has been undefined days since the last update, the content of the article may be outdated.","just":"Just","min":"minutes ago","hour":"hours ago","day":"days ago","month":"months ago"},"swup":false,"plugin":{"flickr_justified_gallery":"https://cdn.jsdelivr.net/npm/flickr-justified-gallery@latest/dist/fjGallery.min.js"},"icons":{"sun":"far fa-sun","moon":"far fa-moon","play":"fas fa-play","email":"far fa-envelope","next":"fas fa-arrow-right","calendar":"far fa-calendar-alt","clock":"far fa-clock","user":"far fa-user","back_top":"fas fa-arrow-up","close":"fas fa-times","search":"fas fa-search","reward":"fas fa-hand-holding-usd","user_tag":"fas fa-user-alt","toc_tag":"fas fa-th-list","read":"fas fa-book-reader","arrows":"fas fa-arrows-alt-h","double_arrows":"fas fa-angle-double-down","copy":"fas fa-copy"},"icontype":"font","highlight":{"plugin":"highlighjs","theme":true,"copy":true,"lang":true,"title":"default","height_limit":200},"creative_commons":{"license":"by-nc-sa","language":"deed.zh"}};</script>
+<script id="async-page-config">window.PAGE_CONFIG = {"isPost":true,"isHome":false,"postUpdate":"2025-03-28 16:16:07"};</script>
+
+<!-- Theme mode css -->
+<link data-swup-theme rel="stylesheet" href="/css/index.css?v=2.0.8" id="trm-switch-style">
+<script>
+    let defaultMode = ASYNC_CONFIG.theme.default !=='auto' ?  ASYNC_CONFIG.theme.default : (window.matchMedia("(prefers-color-scheme: light)").matches ? 'style-light' : 'style-dark')
+    let catchMode = localStorage.getItem('theme-mode') || defaultMode;
+    let type = catchMode === 'style-dark' ? 'add' : 'remove';
+    document.documentElement.classList[type]('dark')
+</script>
+
+<!-- CDN -->
+
+
+    
+    
+
+
+
+<!-- Site Analytics -->
+ 
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+<body>
+
+  <!-- app wrapper -->
+  <div class="trm-app-frame">
+
+    <!-- page preloader -->
+    <div class="trm-preloader">
+    <div class="trm-holder">
+        <div class="preloader">
+            <div></div>
+            <div></div>
+            <div></div>
+            <div></div>
+            <div></div>
+            <div></div>
+            <div></div>
+            <div></div>
+            <div></div>
+            <div></div>
+        </div>
+    </div>
+</div>
+    <!-- page preloader end -->
+
+    <!-- change mode preloader -->
+    <div class="trm-mode-swich-animation-frame">
+    <div class="trm-mode-swich-animation">
+        <i class="i-sun"><i class="iconfont far fa-sun"></i></i>
+        <div class="trm-horizon"></div>
+        <i class="i-moon"><i class="iconfont far fa-moon"></i></i>
+    </div>
+</div>
+    <!-- change mode preloader end -->
+
+      <!-- scroll container -->
+      <div id="trm-dynamic-content" class="trm-swup-animation">
+        <div id="trm-scroll-container" class="trm-scroll-container" data-scroll-container style="opacity: 0">
+          <div data-scroll-section id="content" class="trm-scroll-section">
+
+            <div class="locomotive-scroll__sticky-target" style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; pointer-events: none;"></div>
+
+            <!-- top bar -->
+            <header class="trm-top-bar" data-scroll data-scroll-sticky data-scroll-target=".locomotive-scroll__sticky-target" data-scroll-offset="-10">
+	<div class="container">
+		<div class="trm-left-side">
+			<!-- logo -->
+<a href="/" class="trm-logo-frame trm-anima-link">
+    
+        <img alt="logo" src="/log.svg">
+    
+    
+        <div class="trm-logo-text">
+            程序员贺<span>同学の博客</span>
+        </div>
+    
+</a>
+<!-- logo end -->
+		</div>
+		<div class="trm-right-side">
+			<!-- menu -->
+<div class="trm-menu">
+    <nav>
+        <ul>
+            
+            <li class="menu-item-has-children ">
+                <a  href="/" target="">
+                    首页
+                </a>
+                
+                <ul>
+                    
+                    <li>
+                        <a  href="/archives2/" target="">
+                            archives2
+                        </a>
+                    </li>
+                    
+                </ul>
+                
+            </li>
+            
+            <li class="menu-item-has-children ">
+                <a  href="/archives/" target="">
+                    归档
+                </a>
+                
+            </li>
+            
+            <li class="menu-item-has-children ">
+                <a  href="/categories/" target="">
+                    分类
+                </a>
+                
+            </li>
+            
+            <li class="menu-item-has-children ">
+                <a  href="/about/" target="">
+                    关于
+                </a>
+                
+            </li>
+            
+        </ul>
+    </nav>
+</div>
+<!-- menu end -->
+			
+    <!-- mode switcher place -->
+    <div class="trm-mode-switcher-place">
+        <div class="trm-mode-switcher">
+            <i class="iconfont far fa-sun"></i>
+            <input class="tgl tgl-light" id="trm-swich" type="checkbox">
+            <label class="trm-swich" for="trm-swich"></label>
+            <i class="iconfont far fa-moon"></i>
+        </div>
+    </div>
+    <!-- mode switcher place end -->
+
+			
+		</div>
+		<div class="trm-menu-btn">
+			<span></span>
+		</div>
+	</div>
+</header>
+            <!-- top bar end -->
+
+            <!-- body -->
+            
+<div class="trm-content-start">
+    <!-- banner -->
+    <div class="trm-banner" data-scroll data-scroll-direction="vertical">
+    
+    <!-- banner cover -->
+    <img style="object-position:top;object-fit:cover;" alt="banner" class="trm-banner-cover" data-scroll data-scroll-direction="vertical" data-scroll-speed="-3" src="/img/banner.png">
+    <!-- banner cover end -->
+    
+
+    <!-- banner content -->
+    <div class="trm-banner-content trm-overlay">
+        <div class="container" data-scroll data-scroll-direction="vertical" data-scroll-speed="0">
+            <div class="row">
+                
+                <div class="col-lg-4"></div>
+                
+                <div class="col-lg-8">
+
+                    <!-- banner title -->
+                    <div class="trm-banner-text ">
+                        <div class="trm-label trm-mb-20">
+                            NEWS LETTER
+                        </div>
+                        <h1 class="trm-mb-30 trm-hsmb-font">
+                            Golang 并发编程实战总结
+                        </h1>
+
+                        
+                            <ul class="trm-breadcrumbs trm-label">
+                                <li>
+                                    <a href="/" class="trm-anima-link">Home</a>
+                                </li>
+                                <li>
+                                    <span>
+                                        2025
+                                    </span
+                                ></li>
+                            </ul>
+                        
+                    </div>
+                    <!-- banner title end -->
+
+                    <!-- scroll hint -->
+                    <a href="#about-triger" data-scroll-to="#about-triger" data-scroll-offset="-130" class="trm-scroll-hint-frame">
+                        <div class="trm-scroll-hint"></div>
+                        <span class="trm-label">Scroll down</span>
+                    </a>
+                    <!-- scroll hint end -->
+
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- banner content end -->
+</div>
+    <!-- banner end -->
+    <div class="container">
+        <div class="row">
+            
+                <div id="page-sidebar" class="col-lg-4 hidden-sm">
+                    <!-- main card -->
+                    
+
+<div class="trm-main-card-frame trm-sidebar">
+    <div class="trm-main-card" data-scroll data-scroll-repeat data-scroll-sticky data-scroll-target=".locomotive-scroll__sticky-target" data-scroll-offset="60"> 
+    
+        <div class="trm-user-tabs" id="sidebar-tabs">
+           <div class="trm-tabs-nav trm-mb-40" id="trm-tabs-nav">
+                <div data-to="tabs-user" class="trm-tabs-nav-item">
+                    <i class="iconfont fas fa-user-alt"></i>
+                </div>
+                <div data-to="tabs-toc" class="trm-tabs-nav-item active">
+                    <i class="iconfont fas fa-th-list"></i>
+                </div>
+           </div>
+            <div name="tabs-user" class="trm-tabs-item">
+                <!-- card header -->
+<div class="trm-mc-header">
+    <div class="trm-avatar-frame trm-mb-20">
+        <img alt="Avatar" class="trm-avatar" src="/img/avatar.jpg">
+    </div>
+    <h5 class="trm-name trm-mb-15">
+        程序员贺同学
+    </h5>
+    
+        <div class="trm-label">
+            I`m
+            <span class="trm-typed-text">
+                <!-- Words for theme.user.typedText -->
+            </span>
+        </div>
+    
+</div>
+<!-- card header end -->
+                <!-- sidebar social -->
+
+<div class="trm-divider trm-mb-40 trm-mt-40"></div>
+<div class="trm-social">
+    
+        <a href="https://github.com/rongweihe" title="github" rel="nofollow" target="_blank">
+            <i class="iconfont fab fa-github"></i>
+        </a>
+    
+        <a href="https://gitee.com/rongweihe" title="gitee" rel="nofollow" target="_blank">
+            <i class="iconfont fab fa-gitlab"></i>
+        </a>
+    
+        <a href="https://www.zhihu.com/people/herongwei" title="zhihu" rel="nofollow" target="_blank">
+            <i class="iconfont fab fa-zhihu"></i>
+        </a>
+    
+        <a href="https://space.bilibili.com/25944369" title="bilibili" rel="nofollow" target="_blank">
+            <i class="iconfont fab fa-youtube"></i>
+        </a>
+    
+        <a href="https://i.328888.xyz/2023/04/09/iciz4J.md.jpeg" title="weichat" rel="nofollow" target="_blank">
+            <i class="iconfont fab fa-weixin"></i>
+        </a>
+    
+</div>
+
+<!-- sidebar social end -->
+                <!-- info -->
+<div class="trm-divider trm-mb-40 trm-mt-40"></div>
+<ul class="trm-table trm-mb-20">
+    
+        <li>
+            <div class="trm-label">
+                Residence:
+            </div>
+            <div class="trm-label trm-label-light">
+                Mars
+            </div>
+        </li>
+    
+</ul>
+<!-- info end -->
+
+                
+    <div class="trm-divider trm-mb-40 trm-mt-40"></div>
+    <!-- action button -->
+    <div class="text-center">
+        <a href="mailto:1952281585@qq.com" class="trm-btn">
+            Contact Me
+            <i class="iconfont far fa-envelope"></i>
+        </a>
+    </div>
+    <!-- action button end -->
+
+            </div>
+            <div name="tabs-toc" class="trm-tabs-item active">
+                <div class="post-toc">
+    <ol class="toc"><li class="toc-item toc-level-1"><a rel="nofollow" class="toc-link" href="#Golang-并发编程实践总结"  data-scroll-to="#Golang-并发编程实践总结"><span class="toc-number">1.</span> <span class="toc-text">Golang 并发编程实践总结</span></a></li><li class="toc-item toc-level-1"><a rel="nofollow" class="toc-link" href="#深⼊理解GMP模型"  data-scroll-to="#深⼊理解GMP模型"><span class="toc-number">2.</span> <span class="toc-text">深⼊理解GMP模型</span></a></li><li class="toc-item toc-level-1"><a rel="nofollow" class="toc-link" href="#Channel是什么？什么作用？底层数据结构是什么？"  data-scroll-to="#Channel是什么？什么作用？底层数据结构是什么？"><span class="toc-number">3.</span> <span class="toc-text">Channel是什么？什么作用？底层数据结构是什么？</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a rel="nofollow" class="toc-link" href="#Channel-的作用"  data-scroll-to="#Channel-的作用"><span class="toc-number">3.1.</span> <span class="toc-text">Channel 的作用</span></a></li><li class="toc-item toc-level-2"><a rel="nofollow" class="toc-link" href="#Channel-的底层原理"  data-scroll-to="#Channel-的底层原理"><span class="toc-number">3.2.</span> <span class="toc-text">Channel 的底层原理</span></a></li><li class="toc-item toc-level-2"><a rel="nofollow" class="toc-link" href="#通俗理解无缓冲和有缓冲"  data-scroll-to="#通俗理解无缓冲和有缓冲"><span class="toc-number">3.3.</span> <span class="toc-text">通俗理解无缓冲和有缓冲</span></a></li></ol></li><li class="toc-item toc-level-1"><a rel="nofollow" class="toc-link" href="#Select的用法"  data-scroll-to="#Select的用法"><span class="toc-number">4.</span> <span class="toc-text">Select的用法</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a rel="nofollow" class="toc-link" href="#关键点"  data-scroll-to="#关键点"><span class="toc-number">4.1.</span> <span class="toc-text">关键点</span></a></li><li class="toc-item toc-level-2"><a rel="nofollow" class="toc-link" href="#注意事项"  data-scroll-to="#注意事项"><span class="toc-number">4.2.</span> <span class="toc-text">注意事项</span></a></li></ol></li><li class="toc-item toc-level-1"><a rel="nofollow" class="toc-link" href="#使用sync包"  data-scroll-to="#使用sync包"><span class="toc-number">5.</span> <span class="toc-text">使用sync包</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a rel="nofollow" class="toc-link" href="#Map"  data-scroll-to="#Map"><span class="toc-number">5.1.</span> <span class="toc-text">Map</span></a></li><li class="toc-item toc-level-2"><a rel="nofollow" class="toc-link" href="#相反，并发安全的数据有如下"  data-scroll-to="#相反，并发安全的数据有如下"><span class="toc-number">5.2.</span> <span class="toc-text">相反，并发安全的数据有如下</span></a></li><li class="toc-item toc-level-2"><a rel="nofollow" class="toc-link" href="#sync-Once"  data-scroll-to="#sync-Once"><span class="toc-number">5.3.</span> <span class="toc-text">sync.Once</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a rel="nofollow" class="toc-link" href="#基本用法"  data-scroll-to="#基本用法"><span class="toc-number">5.3.1.</span> <span class="toc-text">基本用法</span></a></li><li class="toc-item toc-level-3"><a rel="nofollow" class="toc-link" href="#注意事项-1"  data-scroll-to="#注意事项-1"><span class="toc-number">5.3.2.</span> <span class="toc-text">注意事项</span></a></li></ol></li><li class="toc-item toc-level-2"><a rel="nofollow" class="toc-link" href="#前言"  data-scroll-to="#前言"><span class="toc-number">5.4.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-2"><a rel="nofollow" class="toc-link" href="#Goroutine-与-Channel"  data-scroll-to="#Goroutine-与-Channel"><span class="toc-number">5.5.</span> <span class="toc-text">Goroutine 与 Channel</span></a></li><li class="toc-item toc-level-2"><a rel="nofollow" class="toc-link" href="#Select-的用法"  data-scroll-to="#Select-的用法"><span class="toc-number">5.6.</span> <span class="toc-text">Select 的用法</span></a></li><li class="toc-item toc-level-2"><a rel="nofollow" class="toc-link" href="#使用-sync-包"  data-scroll-to="#使用-sync-包"><span class="toc-number">5.7.</span> <span class="toc-text">使用 sync 包</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a rel="nofollow" class="toc-link" href="#Map-1"  data-scroll-to="#Map-1"><span class="toc-number">5.7.1.</span> <span class="toc-text">Map</span></a></li><li class="toc-item toc-level-3"><a rel="nofollow" class="toc-link" href="#Mutex"  data-scroll-to="#Mutex"><span class="toc-number">5.7.2.</span> <span class="toc-text">Mutex</span></a></li><li class="toc-item toc-level-3"><a rel="nofollow" class="toc-link" href="#RWMutex"  data-scroll-to="#RWMutex"><span class="toc-number">5.7.3.</span> <span class="toc-text">RWMutex</span></a></li><li class="toc-item toc-level-3"><a rel="nofollow" class="toc-link" href="#Once"  data-scroll-to="#Once"><span class="toc-number">5.7.4.</span> <span class="toc-text">Once</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a rel="nofollow" class="toc-link" href="#Pool"  data-scroll-to="#Pool"><span class="toc-number">6.</span> <span class="toc-text">Pool</span></a></li><li class="toc-item toc-level-1"><a rel="nofollow" class="toc-link" href="#WaitGroup"  data-scroll-to="#WaitGroup"><span class="toc-number">7.</span> <span class="toc-text">WaitGroup</span></a></li><li class="toc-item toc-level-1"><a rel="nofollow" class="toc-link" href="#Context"  data-scroll-to="#Context"><span class="toc-number">8.</span> <span class="toc-text">Context</span></a></li><li class="toc-item toc-level-1"><a rel="nofollow" class="toc-link" href="#常见内存泄露及注意事项"  data-scroll-to="#常见内存泄露及注意事项"><span class="toc-number">9.</span> <span class="toc-text">常见内存泄露及注意事项</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a rel="nofollow" class="toc-link" href="#注意事项-2"  data-scroll-to="#注意事项-2"><span class="toc-number">9.1.</span> <span class="toc-text">注意事项</span></a></li></ol></li></ol>
+</div>
+            </div>
+        </div>
+    
+    </div>
+</div>
+                    <!-- main card end -->
+                </div>
+            
+            <div id="page-content" class="col-lg-8">
+                <div class="trm-content" id="trm-content">
+                    <div data-scroll data-scroll-repeat data-scroll-offset="500" id="about-triger"></div>
+
+                    <div id="post-info" class="row hidden-sm">
+    <div class="col-sm-4">
+        <div class="trm-card trm-label trm-label-light text-center">
+            <i class="iconfont far fa-calendar-alt trm-icon"></i><br>
+            03/28
+        </div>
+    </div>
+    <div class="col-sm-4">
+        <div class="trm-card trm-label trm-label-light text-center">
+            <i class="iconfont far fa-clock trm-icon"></i><br>
+            16:12
+        </div>
+    </div>
+    <div class="col-sm-4">
+        <div id="post-author" class="trm-card trm-label trm-label-light text-center">
+            <i class="iconfont far fa-user trm-icon"></i><br>
+            贺同学
+        </div>
+    </div>
+</div>
+<div class="trm-card ">
+    <article id="article-container" class="trm-publication">
+    <h1 id="Golang-并发编程实践总结"><a href="#Golang-并发编程实践总结" class="headerlink" title="Golang 并发编程实践总结"></a>Golang 并发编程实践总结</h1><p>目录</p>
+<ul>
+<li><a href="#golang-%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B%E5%AE%9E%E8%B7%B5%E6%80%BB%E7%BB%93">Golang 并发编程实践总结</a><ul>
+<li><a href="#%E6%B7%B1%E2%BC%8A%E7%90%86%E8%A7%A3GMP%E6%A8%A1%E5%9E%8B">深⼊理解GMP模型</a></li>
+<li><a href="#Channel%E6%98%AF%E4%BB%80%E4%B9%88%EF%BC%9F%E4%BB%80%E4%B9%88%E4%BD%9C%E7%94%A8%EF%BC%9F%E5%BA%95%E5%B1%82%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E6%98%AF%E4%BB%80%E4%B9%88%EF%BC%9F">Channel是什么</a></li>
+<li><a href="#Select%E7%9A%84%E7%94%A8%E6%B3%95">Select的用法</a></li>
+<li><a href="#%E4%BD%BF%E7%94%A8sync%E5%8C%85">使用sync包</a></li>
+<li><a href="#WaitGroup">WaitGroup</a></li>
+<li><a href="#Pool">Pool</a></li>
+<li><a href="#%E5%B8%B8%E8%A7%81%E5%86%85%E5%AD%98%E6%B3%84%E9%9C%B2%E5%8F%8A%E6%B3%A8%E6%84%8F%E4%BA%8B%E9%A1%B9">常见内存泄露及注意事项</a></li>
+</ul>
+</li>
+</ul>
+<h1 id="深⼊理解GMP模型"><a href="#深⼊理解GMP模型" class="headerlink" title="深⼊理解GMP模型"></a>深⼊理解GMP模型</h1><p><strong>【思考🤔】⾸先思考⼀个问题为什么需要协程？</strong></p>
+<p>其实答案也很明显：在多进程和多线程时代，CPU 内核负责调度，为系统提供并发处理能⼒，但也存在⼀些缺点：</p>
+<ul>
+<li><p>资源消耗⾼：进程和线程的创建、切换和销毁都会消耗⼤量 CPU 资源。</p>
+</li>
+<li><p>内存占⽤⼤：每个线程约需 4MB 内存，⼤量线程会导致内存消耗过⾼。</p>
+</li>
+<li><p>应⽤层⽆法直接控制内核调度，只能通过减少线程创建和切换来优化性能。</p>
+</li>
+</ul>
+<p>这促⽣了协程的概念：⽤户级别的轻量线程。在 Go 中，协程被称为 <code>goroutine</code>，它主要解决了内核线程的两个“太重”问题：</p>
+<ul>
+<li>创建和切换：<code>goroutine</code>  在⽤户态创建和切换，⽆需进⼊内核，开销⽐线程⼩得多。</li>
+<li>内存占⽤：<code>goroutine</code>  的初始栈只有 2KB，栈空间可动态扩展或收缩，避免了内存浪费与栈溢出⻛险。</li>
+<li>由于 <code>goroutine</code>  的轻量特性，Go 程序可以轻松创建成千上万个并发任务，⽽不⽤担⼼性能和内存问题。</li>
+</ul>
+<p><strong>【思考🤔 】第⼆个问题：</strong>golang <strong>可以在⽤户级别空间创建协程底层是靠什么实现的</strong>?</p>
+<p>其实是虽然协程在⽤户态空间运⾏，但其底层实现依赖于Go运⾏时对操作系统线程（OS Threads）的管理和调度。</p>
+<p>具体来说：Go 协程运⾏在⽤户态空间，但它们并不是直接由操作系统调度的线程。相反，<strong>Go <strong>运⾏时通过⼀个⽤户态的调度器（</strong>Scheduler</strong>）来管理协程的执⾏，并将协程映射到操作系统线程上。</p>
+<ul>
+<li>⽤户态协程（Goroutine）：轻量级的并发单元，由Go运⾏时管理。</li>
+<li>操作系统线程（OS Thread）：由操作系统调度的线程，⽤于执⾏Go运⾏时的代码。</li>
+<li>运⾏时调度器（Scheduler）：负责将协程分配到操作系统线程上执⾏。</li>
+</ul>
+<p>Go 运⾏时的调度器是协程实现的核⼼，它通过以下组件协同⼯作：</p>
+<ul>
+<li>G（goroutine）：<ul>
+<li>是⽤户态线程的抽象，可以在 M 上运⾏，存储于全局队列和 P 的本地队列（⼤⼩ 256）中。</li>
+<li><strong>特点：</strong>G是轻量级的，创建和销毁的开销极⼩。</li>
+</ul>
+</li>
+<li>M（Machine）：<ul>
+<li>是操作系统线程的抽象，⼀个 M 代表⼀个线程，最多绑定⼀个 P。M 阻塞时会释放 P，允许 P与其他空闲的 M 绑定，如果没有空闲的 M，则创建新的 M。</li>
+<li><strong>特点：</strong>M的数量通常远少于G的数量，由Go运⾏时动态管理。</li>
+</ul>
+</li>
+<li>P（Processor）：<ul>
+<li>逻辑处理器，抽象代表 CPU 核⼼。P 的数量决定了程序的并⾏能⼒，可以通过 GOMAXPROCS 设置。每个 M 需要绑定⼀个 P 进⾏任务调度。是 M 和 G 之间的桥梁。每个 P 都有⼀个本地的 Goroutine 队列，同时也可以访问全局的 Goroutine 队列。P 负责调度和管理 Goroutine 的执⾏，决定哪个 Goroutine 应该在哪个 M 上运⾏。</li>
+<li><strong>特点：</strong> P的数量通常与CPU核⼼数相匹配，⽤于充分利⽤多核CPU的计算能⼒。</li>
+</ul>
+</li>
+</ul>
+<p>Go运⾏时的调度器通过以下步骤管理协程的执⾏：</p>
+<ul>
+<li>创建协程：当调⽤go func()时，Go运⾏时会创建⼀个新的G，并将其加⼊到调度队列中。</li>
+<li>调度协程：调度器从队列中取出G，并将其分配给⼀个P。P将G绑定到⼀个M上，M开始执⾏G中的代码。</li>
+</ul>
+<p>阻塞与唤醒</p>
+<ul>
+<li>如果G在执⾏过程中阻塞（如等待I&#x2F;O操作），调度器会将该G挂起，并从队列中取出另⼀个G继续执⾏。</li>
+<li>当阻塞的G被唤醒时，调度器会将其重新加⼊到队列中，等待执⾏。</li>
+</ul>
+<p>线程复⽤：</p>
+<ul>
+<li>如果所有M都被阻塞，调度器会创建新的M来执⾏队列中的G。</li>
+<li>如果某个M完成任务，调度器会将该M回收，⽤于执⾏其他G。</li>
+</ul>
+<p>GMP 模型引⼊了 P 来解决 GM 模型的缺陷：</p>
+<ul>
+<li>⽆锁访问本地队列：P 保存 goroutine 的本地队列，M 优先从 P 的本地队列中取 G 执⾏，仅必要时访问全局队列，减少了锁竞争，提升了并发性。</li>
+<li>优化数据局部性：新创建的 G 会优先放⼊创建它的 M 绑定的 P 的本地队列中，避免频繁的数据交互，提升内存使⽤效率。</li>
+<li>Hand Off 交接机制：M 阻塞时，将绑定的 P 和其任务交给其他 M，提升了资源利⽤率和并发度。</li>
+</ul>
+<p>GMP 调度时机：介绍 GMP 的调度时机，主要分为正常调度、主动调度、被动调度和抢占调度四种情况</p>
+<p>具体调度过程</p>
+<ul>
+<li><p><strong>创建</strong> Goroutine：当使⽤ go 关键字创建⼀个新的 Goroutine 时，Go 运⾏时会为其分配⼀个 G 对象，并将其放⼊全局或某个 P 的本地 Goroutine 队列中。</p>
+</li>
+<li><p><strong>调度</strong> Goroutine <strong>到</strong> M <strong>上执⾏</strong>：M 会从 P 的本地队列或全局队列中获取⼀个 G，并将其绑定到⾃⼰身上执⾏。如果 P 的本地队列为空，M 会尝试从其他 P 的本地队列中 “偷取” ⼀些 G 来执⾏，这种机制称为 “⼯作窃取”，可以提⾼调度的效率。</p>
+</li>
+<li><p><strong>阻塞和唤醒</strong>：当⼀个 Goroutine 遇到阻塞操作（如 I&#x2F;O 操作、Channel 读写等）时，M 会将该 G 标记为阻塞状<strong>阻塞和唤醒</strong>：当⼀个 Goroutine 遇到阻塞操作（如 I&#x2F;O 操作、Channel 读写等）时，M 会将该 G 标记为阻塞状态，并将其从当前 P 的队列中移除。同时，M 会继续从队列中获取其他 G 来执⾏。当阻塞操作完成后，G 会被唤醒，并重新放⼊某个 P 的队列中等待调度。</p>
+</li>
+<li><p><strong>上下⽂切换</strong>：Goroutine 的上下⽂切换由 Go 运⾏时负责，⽽不是操作系统内核。这种⽤户态的上下⽂切换⽐内核态的上下⽂切换开销⼩得多，因此可以实现⾼效的并发调度。</p>
+</li>
+</ul>
+<h1 id="Channel是什么？什么作用？底层数据结构是什么？"><a href="#Channel是什么？什么作用？底层数据结构是什么？" class="headerlink" title="Channel是什么？什么作用？底层数据结构是什么？"></a>Channel是什么？什么作用？底层数据结构是什么？</h1><h2 id="Channel-的作用"><a href="#Channel-的作用" class="headerlink" title="Channel 的作用"></a>Channel 的作用</h2><p>在 Golang 并发编程中，channel（通道）是一种用于 goroutine 之间通信和同步的机制。它的主要作用包括：</p>
+<ol>
+<li><strong>goroutine 间通信</strong>：channel 允许不同的 goroutine 之间传递数据，实现数据的共享和交换。</li>
+<li><strong>goroutine 同步</strong>：通过 channel 可以控制 goroutine 的执行顺序，实现对并发操作的同步。</li>
+</ol>
+<h2 id="Channel-的底层原理"><a href="#Channel-的底层原理" class="headerlink" title="Channel 的底层原理"></a>Channel 的底层原理</h2><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> hchan <span class="keyword">struct</span> &#123;</span><br><span class="line"></span><br><span class="line">  qcount <span class="type">uint</span> <span class="comment">// 当前缓冲区中的元素数量</span></span><br><span class="line"></span><br><span class="line">  dataqsiz buf <span class="type">uint</span> unsafe.Pointer <span class="comment">// 缓冲区⼤⼩（⽆缓冲区时为 0）</span></span><br><span class="line"></span><br><span class="line">  <span class="comment">// 指向缓冲区的指针</span></span><br><span class="line"></span><br><span class="line">  elemsize <span class="type">uint16</span> <span class="comment">// 元素⼤⼩</span></span><br><span class="line"></span><br><span class="line">  closed <span class="type">uint32</span> <span class="comment">// 标记通道是否已关闭</span></span><br><span class="line"></span><br><span class="line">  sendx <span class="type">uint</span> <span class="comment">// 下⼀个发送操作的索引</span></span><br><span class="line"></span><br><span class="line">  recvx <span class="type">uint</span> <span class="comment">// 下⼀个接收操作的索引</span></span><br><span class="line"></span><br><span class="line">  recvq waitq <span class="comment">// 等待接收的协程队列</span></span><br><span class="line"></span><br><span class="line">  sendq waitq <span class="comment">// 等待发送的协程队列</span></span><br><span class="line"></span><br><span class="line">  lock mutex <span class="comment">// 互斥锁，⽤于保护并发操作</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>buf 指向底层循环数组，只有缓冲型的 channel 才有。⽆缓冲区的通道则直接在发送和接收操作之间传递数据。</p>
+<p> sendx， recvx 均指向底层循环数组，表示当前可以发送和接收的元素位置索引值（相对于底层数组）。</p>
+<p> sendq， recvq 分别表示被阻塞的 goroutine，这些 goroutine 由于尝试读取 channel 或向 channel 发送数据⽽被阻</p>
+<p>  塞。</p>
+<p>waitq 是 sudog 的⼀个双向链表，⽽ sudog 实际上是对 goroutine 的⼀个封装：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> waitq <span class="keyword">struct</span> &#123;</span><br><span class="line"></span><br><span class="line">  first *sudog</span><br><span class="line"></span><br><span class="line">  last *sudog</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>lock ⽤来保证每个读 channel 或写 channel 的操作都是原⼦的。</p>
+<ul>
+<li><strong>⽆缓冲区通道</strong>： dataqsiz 为 0，发送和接收操作必须同步完成。如果发送⽅没有接收⽅，发送⽅会阻塞，反之</li>
+</ul>
+<p>亦然。</p>
+<ul>
+<li><strong>有缓冲区通道</strong>： dataqsiz ⼤于 0，发送⽅可以将数据写⼊缓冲区，接收⽅可以从缓冲区读取数据。当缓冲区满</li>
+</ul>
+<p>时，发送⽅阻塞；当缓冲区为空时，接收⽅阻塞。</p>
+<p>hchan 使⽤互斥锁（ mutex）来保护对缓冲区和协程队列的访问，确保在并发操作时不会出现数据竞争。通过这些底层结构和机制， channel 实现了⾼效且安全的协程间通信。</p>
+<p>在 Golang 中，channel 可以分为无缓冲 channel 和有缓冲 channel，它们的主要区别在于通信方式和使用场景。以下是两者的通俗理解和具体区别：</p>
+<h2 id="通俗理解无缓冲和有缓冲"><a href="#通俗理解无缓冲和有缓冲" class="headerlink" title="通俗理解无缓冲和有缓冲"></a>通俗理解无缓冲和有缓冲</h2><p><strong>无缓冲 channel（同步 channel）</strong></p>
+<ul>
+<li>无缓冲 channel 就像两个人直接进行面对面的交流。</li>
+<li>发送方和接收方必须同时准备好，才能进行数据传递。</li>
+<li>如果发送方先到，它会一直等待接收方到来；如果接收方先到，它会一直等待发送方发送数据。</li>
+<li>无缓冲 channel 的发送和接收操作是同步的，会阻塞直到双方都准备好。</li>
+</ul>
+<p><strong>有缓冲 channel（异步 channel）</strong></p>
+<ul>
+<li>有缓冲 channel 就像一个快递柜，发送方可以先把东西放在快递柜里，接收方可以在有空的时候来取。</li>
+<li>发送方在缓冲区有空位时可以直接把数据放进去，不需要等待接收方。</li>
+<li>接收方在缓冲区有数据时可以直接取出来，不需要等待发送方。</li>
+<li>有缓冲 channel 的发送和接收操作在缓冲区有空间或数据时可以异步进行，只有在缓冲区满或空时才会阻塞。</li>
+</ul>
+<p>使用场景</p>
+<p><strong>无缓冲 channel</strong></p>
+<ul>
+<li>当需要严格同步两个 goroutine 的执行顺序时。</li>
+<li>当需要确保发送方和接收方同时参与通信时。</li>
+</ul>
+<p><strong>有缓冲 channel</strong></p>
+<ul>
+<li>当需要解耦发送和接收操作时。</li>
+<li>当需要暂存数据，避免发送方或接收方阻塞时。</li>
+</ul>
+<h1 id="Select的用法"><a href="#Select的用法" class="headerlink" title="Select的用法"></a>Select的用法</h1><p>Select 用来处理一个 Goroutine 等待多个 Channel 的情况。类似于 Switch 语句，Select 的每个 case 都是一个通信操作（发送或接收），当有 case 满足条件的时候，则执行对应 case 块的代码。</p>
+<p>当没有 case 满足的时候，Select 逻辑块也会阻塞程序，当有多个 case 满足的时候，Select 会公平选择一个满足条件的 case 语句块执行（GO1.8 之后会随机选择一个）。为了避免阻塞，可以使用 default 。</p>
+<p>在 Golang 并发编程中，<code>select</code> 语句用于处理多个 channel 的通信。它允许程序同时监听多个 channel 上的通信操作，并根据哪个操作最先完成来执行相应的代码块。<code>select</code> 语句在处理多个并发通信时非常有用，可以实现多路复用。</p>
+<h2 id="关键点"><a href="#关键点" class="headerlink" title="关键点"></a>关键点</h2><ol>
+<li><strong>多路复用</strong>：<code>select</code> 会同时监听多个 channel 上的通信操作。</li>
+<li><strong>随机选择</strong>：如果有多个通信操作同时可以执行，<code>select</code> 会随机选择一个执行。</li>
+<li><strong>阻塞</strong>：如果没有通信操作可以立即执行且没有默认分支，<code>select</code> 会阻塞，直到至少有一个通信操作可以执行。</li>
+<li><strong>默认分支</strong>：如果有默认分支，当没有通信操作可以立即执行时，会执行默认分支的代码。</li>
+</ol>
+<h2 id="注意事项"><a href="#注意事项" class="headerlink" title="注意事项"></a>注意事项</h2><ol>
+<li><strong>随机选择</strong>：当多个 <code>case</code> 同时满足时，<code>select</code> 会随机选择一个执行，无法预测具体是哪一个。</li>
+<li><strong>阻塞</strong>：如果没有 <code>default</code> 分支且没有通信操作可以立即执行，<code>select</code> 会阻塞。</li>
+<li><strong>死锁风险</strong>：如果所有 <code>case</code> 都无法执行且没有 <code>default</code> 分支，程序可能会陷入死锁。</li>
+<li><strong>效率</strong>：<code>select</code> 的效率较高，适合处理多个并发通信。</li>
+</ol>
+<h1 id="使用sync包"><a href="#使用sync包" class="headerlink" title="使用sync包"></a>使用sync包</h1><p>Golang 并发编程离不开 sync 包，里面提供了很多有用的类型和方法。常用知识点如下：</p>
+<h2 id="Map"><a href="#Map" class="headerlink" title="Map"></a>Map</h2><p>普通的 map 不是并发安全的，容易出现竞争问题。sync.Map 是官方提供的一个并发安全的 Map，不需要自己额外处理锁、协调等操作。该类型提供了以下方法：</p>
+<ul>
+<li>Loads(): 装载键值（获取键值）</li>
+<li>Store(): 储存键值</li>
+<li>Delete(): 删除键值</li>
+<li>LoadOrStore(): 如果存在则获取键值，不存在则存储</li>
+<li>Range(): 遍历 Map</li>
+</ul>
+<h2 id="相反，并发安全的数据有如下"><a href="#相反，并发安全的数据有如下" class="headerlink" title="相反，并发安全的数据有如下"></a>相反，并发安全的数据有如下</h2><ul>
+<li><p>sync.Map：通过读写 map来实现，读请求默认⾛读 map，如果读不到再请求写 map（加锁保证），同时在特定条件满⾜的情况下同步缓存和 DB 中的数据。misses 字段则⽤于计数，记录缓存未命中的次数，当我们要读取map 中某个 key 对应的值时，优先从 read 读取，如果 read 中不存在，则 misses 值加 1，然后继续从 dirty 中读取，当 misses 值达到某个阈值时，sync.Map 就会将 dirty 提升为 read。</p>
+</li>
+<li><p>sync.Pool是⼀个并发安全的临时对象池。它可以安全地被多个 goroutine 同时使⽤，⽤于缓存和复⽤临时对象，减少频繁创建和销毁对象带来的内存分配和垃圾回收压⼒，提⾼性能。</p>
+</li>
+<li><p>原⼦类型包 sync&#x2F;atomic 包;进⾏并发安全的操作。</p>
+</li>
+<li><p>读写锁（ sync.RWMutex）包装的数据结构。</p>
+</li>
+<li><p>Mutex：互斥锁。对于加了锁的操作，其他的 Goroutine 在读取相应对象时会阻塞，知道互斥对象释放。频繁、大量的使用互斥锁会导致性能的降低，应该只在必须用的地方用。互斥锁使用不当还有可能造成死锁、活锁、饿死等情况，就比较复杂了。</p>
+</li>
+</ul>
+<h2 id="sync-Once"><a href="#sync-Once" class="headerlink" title="sync.Once"></a><code>sync.Once</code></h2><p>在 Golang 中，<code>sync.Once</code> 是一个用于确保某个函数或方法只被调用一次的工具。它在并发编程中非常有用，可以用来实现单例模式、资源初始化等场景，确保某些操作只执行一次，即使有多个 goroutine 同时尝试执行这些操作。</p>
+<h3 id="基本用法"><a href="#基本用法" class="headerlink" title="基本用法"></a>基本用法</h3><p><code>sync.Once</code> 提供了两个主要方法：</p>
+<ol>
+<li>**<code>Do(f func())</code>**：执行给定的函数 <code>f</code>，并且保证 <code>f</code> 只会被执行一次，即使有多个 goroutine 调用 <code>Do</code> 方法。</li>
+<li>**<code>Done() chan struct&#123;&#125;</code>**：返回一个通道，当 <code>Do</code> 方法完成时，该通道会关闭。可以用于等待 <code>Do</code> 方法的完成。</li>
+</ol>
+<p>示例代码</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> main</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> (</span><br><span class="line">    <span class="string">&quot;fmt&quot;</span></span><br><span class="line">    <span class="string">&quot;sync&quot;</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">    <span class="keyword">var</span> once sync.Once</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 定义一个需要只执行一次的函数</span></span><br><span class="line">    initFunc := <span class="function"><span class="keyword">func</span><span class="params">()</span></span> &#123;</span><br><span class="line">        fmt.Println(<span class="string">&quot;Initializing...&quot;</span>)</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 多个 goroutine 同时调用 once.Do</span></span><br><span class="line">    <span class="keyword">for</span> i := <span class="number">0</span>; i &lt; <span class="number">5</span>; i++ &#123;</span><br><span class="line">        <span class="keyword">go</span> <span class="function"><span class="keyword">func</span><span class="params">()</span></span> &#123;</span><br><span class="line">            once.Do(initFunc)</span><br><span class="line">        &#125;()</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 等待所有 goroutine 完成</span></span><br><span class="line">    time.Sleep(<span class="number">100</span> * time.Millisecond)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>单例模式</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> main</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> (</span><br><span class="line">    <span class="string">&quot;fmt&quot;</span></span><br><span class="line">    <span class="string">&quot;sync&quot;</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> (</span><br><span class="line">    instance *MySingleton</span><br><span class="line">    once     sync.Once</span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="keyword">type</span> MySingleton <span class="keyword">struct</span>&#123;&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">NewMySingleton</span><span class="params">()</span></span> *MySingleton &#123;</span><br><span class="line">    once.Do(<span class="function"><span class="keyword">func</span><span class="params">()</span></span> &#123;</span><br><span class="line">        instance = &amp;MySingleton&#123;&#125;</span><br><span class="line">        fmt.Println(<span class="string">&quot;Singleton instance created&quot;</span>)</span><br><span class="line">    &#125;)</span><br><span class="line">    <span class="keyword">return</span> instance</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">    <span class="comment">// 多个 goroutine 同时获取单例实例</span></span><br><span class="line">    <span class="keyword">for</span> i := <span class="number">0</span>; i &lt; <span class="number">5</span>; i++ &#123;</span><br><span class="line">        <span class="keyword">go</span> <span class="function"><span class="keyword">func</span><span class="params">()</span></span> &#123;</span><br><span class="line">            singleton := NewMySingleton()</span><br><span class="line">            fmt.Println(<span class="string">&quot;Got singleton instance:&quot;</span>, singleton)</span><br><span class="line">        &#125;()</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 等待所有 goroutine 完成</span></span><br><span class="line">    time.Sleep(<span class="number">100</span> * time.Millisecond)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>输出：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">Singleton instance created</span><br><span class="line">Got singleton instance: &amp;&#123;&#123;&#125;&#125;</span><br><span class="line">Got singleton instance: &amp;&#123;&#123;&#125;&#125;</span><br><span class="line">Got singleton instance: &amp;&#123;&#123;&#125;&#125;</span><br><span class="line">Got singleton instance: &amp;&#123;&#123;&#125;&#125;</span><br><span class="line">Got singleton instance: &amp;&#123;&#123;&#125;&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="注意事项-1"><a href="#注意事项-1" class="headerlink" title="注意事项"></a>注意事项</h3><ol>
+<li><strong>线程安全性</strong>：<code>sync.Once</code> 是线程安全的，可以安全地在多个 goroutine 中使用。</li>
+<li><strong>函数执行</strong>：<code>Do</code> 方法中的函数只会被执行一次，即使有多个 goroutine 同时调用 <code>Do</code> 方法。</li>
+<li><strong>不可重置</strong>：<code>sync.Once</code> 不能被重置，一旦执行完成，无法再次执行。</li>
+</ol>
+<p><code>sync.Once</code> 是 Golang 并发编程中一个非常有用的工具，用于确保某个函数或方法只被调用一次。它在实现单例模式、资源初始化等场景中非常有用，可以简化代码并提高程序的可靠性。</p>
+<h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>最近的项目都使用 Golang 进行开发，因为自己是从头自学，难免踩了很多坑。目前项目接近尾声，抽空对一些重要的知识点做一些总结。</p>
+<h2 id="Goroutine-与-Channel"><a href="#Goroutine-与-Channel" class="headerlink" title="Goroutine 与 Channel"></a>Goroutine 与 Channel</h2><p>什么是 Goroutine 呢？有人说它是轻量级的进程，或者干脆说是协程。其实都不太准确，协程仅仅是在一个进程中进行子程序的切换，而 Goroutine 是可以多线程多路复用的。简而言之，Goroutine 是一个轻量级的、与其他 Goroutine 运行在同一块内存地址中的并发执行的函数模型。它的成本仅仅比堆栈的分配高一点点，所以很廉价。Goroutine 可以在多个线程上通过 Goroutine 自己的调度器实现多路复用。</p>
+<p>那什么是 Channel 呢？它是程序中一种类型化的通道，即在这个虚拟通道中传输的是某种预定义的数据类型。通过相应的操作符如 <code>&lt;-</code> 可以在 Goroutine 之间发送和接收数据。 Channel 在默认情况下，接收或者发送的某端没有执行的时候会阻塞程序。Channel 可以在创建时定义缓冲大小，即缓冲区已满时才会发送缓存区的所有数据。</p>
+<p>Channel 最简单的用法就是利用其阻塞程序的特性来做 Goroutine 结束的标志。例如在 Goroutine 代码块外定义一个 Channel 接收其中的数据，当 Goroutine 代码块内部执行完毕时向 Channel 发送完成信号进而执行后续的代码。</p>
+<p>当程序有多个 Goroutine 或者多个 Channel ，他们管理起来就容易变得混乱。这时就可以考虑使用下文讲到的知识。</p>
+<h2 id="Select-的用法"><a href="#Select-的用法" class="headerlink" title="Select 的用法"></a>Select 的用法</h2><p>Select 用来处理一个 Goroutine 等待多个 Channel 的情况。类似于 Switch 语句，Select 的每个 case 都是一个通信操作（发送或接收），当有 case 满足条件的时候，则执行对应 case 块的代码。当没有 case 满足的时候，Select 逻辑块也会阻塞程序，当有多个 case 满足的时候，Select 会公平选择一个满足条件的 case 语句块执行。为了避免阻塞，可以使用 default 。</p>
+<h2 id="使用-sync-包"><a href="#使用-sync-包" class="headerlink" title="使用 sync 包"></a>使用 sync 包</h2><p>Golang 并发编程离不开 sync 包，里面提供了很多有用的类型和方法。常用知识点如下：</p>
+<h3 id="Map-1"><a href="#Map-1" class="headerlink" title="Map"></a>Map</h3><p>普通的 map 不是并发安全的，容易出现竞争问题。sync.Map 是官方提供的一个并发安全的 Map，不需要自己额外处理锁、协调等操作。该类型提供了以下方法：</p>
+<ul>
+<li>Loads(): 装载键值（获取键值）</li>
+<li>Store(): 储存键值</li>
+<li>Delete(): 删除键值</li>
+<li>LoadOrStore(): 如果存在则获取键值，不存在则存储</li>
+<li>Range(): 遍历 Map</li>
+</ul>
+<p>我在项目中使用该类型替代了自己原本定义的一个全局 Map 类型，相比自己维护互斥锁或者读写锁等操作方便了不少，而且性能有优势（具体没有测试），据官方说明该 Map 类型显著减少了锁的争用。</p>
+<h3 id="Mutex"><a href="#Mutex" class="headerlink" title="Mutex"></a>Mutex</h3><p>互斥锁。对于加了锁的操作，其他的 Goroutine 在读取相应对象时会阻塞，知道互斥对象释放。频繁、大量的使用互斥锁会导致性能的降低，应该只在必须用的地方用。互斥锁使用不当还有可能造成死锁、活锁、饿死等情况，就比较复杂了。</p>
+<h3 id="RWMutex"><a href="#RWMutex" class="headerlink" title="RWMutex"></a>RWMutex</h3><p>读写锁。相较互斥锁，读写锁相较互斥锁性能损耗低些，因为对于只读操作只加共享锁，是支持并发的，仅在写操作上加互斥锁，明显提升了效率。</p>
+<h3 id="Once"><a href="#Once" class="headerlink" title="Once"></a>Once</h3><p>Once 这个对象很有用，它是一个只执行一个操作的对象。该对象仅有一个 Do() 方法，仅当 Once 实例第一次调用 Do() 方法时，Do() 才会调用传递过来的函数。</p>
+<p>这对于要实现单例模式的代码会方便一些，定义一个 Once 对象，将要实现单例的对象的初始化方法传递给 Do()，就能保证单例的并发安全。</p>
+<p>但使用互斥锁不也能解决这个问题吗？其实不然，互斥锁的代价太高，会导致 Goroutines 无法对该变量进行并发访问。那我把它改成读写锁呢？例如：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line">var mu sync.RWMutex // 定义读写锁</span><br><span class="line">var someMap map[string]interface&#123;&#125;</span><br><span class="line"></span><br><span class="line">// 并发安全的单例</span><br><span class="line">func GetMap(name string) interface&#123;&#125; &#123;</span><br><span class="line">    // 加读锁，并判断 someMap 是否为空</span><br><span class="line">    // 如果不为空则获取 Map 中的值</span><br><span class="line">    mu.RLock()</span><br><span class="line">    if someMap != nil &#123;</span><br><span class="line">        foo := someMap[name]</span><br><span class="line">        mu.RUnlock()</span><br><span class="line">        return foo</span><br><span class="line">    &#125;</span><br><span class="line">    // 注意这里无法在 else 语句将共享锁升级为互斥锁</span><br><span class="line">    mu.RUnlock()</span><br><span class="line"></span><br><span class="line">    // 如果 someMap 为空加互斥锁，并初始化 someMap</span><br><span class="line">    mu.Lock()</span><br><span class="line"></span><br><span class="line">    // 注意：必须要再一次检查是否为 nil</span><br><span class="line">    if someMap == nil &#123; </span><br><span class="line">        CreateMap()</span><br><span class="line">    &#125;</span><br><span class="line">    foo := someMap[name]</span><br><span class="line">    mu.Unlock()</span><br><span class="line">    return foo</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>然而这种方式不觉得太复杂了吗？</p>
+<h1 id="Pool"><a href="#Pool" class="headerlink" title="Pool"></a>Pool</h1><p>Pool 是一组用来保存或者检索的临时对象。Pub() 方法的入参是空接口，意味着可以把任何类型的对象放置在池子中以复用，减轻垃圾回收器的压力，正确的使用能很轻松的构建高效、线程安全的自由列表。</p>
+<h1 id="WaitGroup"><a href="#WaitGroup" class="headerlink" title="WaitGroup"></a>WaitGroup</h1><p>WaitGroup 适用于等待多个 Goroutine 完成的逻辑下使用，控制多个 Goroutine 之间的同步。每新建一个 Goroutine 就可以调用 WaitGroup.Add() 来增加需要等待的 Goroutine 数量，当每个 Goroutine 都运行完毕时各自调用 Done() ，可以在程序的外层调用 Wait() 以阻塞程序直到所有 Goroutine 都调用了 Done()。</p>
+<p>这样就可以在程序中使每个 WaitGroup 之间是同步的，但是 WaitGroup 之内的 Goroutine 是异步的。</p>
+<h1 id="Context"><a href="#Context" class="headerlink" title="Context"></a>Context</h1><p>与 WaitGroup 不同，Context 实现了对串行的 Goroutine 的跟踪和控制，比如一个 Goroutine 在运行过程中派生出了其他 Goroutine，这些派生出的 Goroutine 又派生出了其他 Goroutine，这种 Goroutine 的关系链使用之前的 Channel + Select 来维护会使得程序变得异常复杂。而使用 Context 上下文来实现 Goroutine 间截止时间、取消信号或其他变量的共享和传递会变得简单。</p>
+<p>Context 有四种方法来派生出不同的上下文：</p>
+<ul>
+<li>WithCancel: 传递取消信号</li>
+<li>WithDeadline: 传递截止时间</li>
+<li>WithTimeout: 传递超时信号</li>
+<li>WithValue: 传递其他值</li>
+</ul>
+<p>例如 WithCancel 派生出的上下文，在对应 Goroutine 中调用 cancel() 会使所有同一上下文派生出的所有 Goroutine 关闭，在派生出的 Goroutine 中可以通过监听 ctx.Done() 来判断是否关闭 Goroutine。</p>
+<p>Context 还有许多其他的用途，在 gRPC 、gin 中大量运用了 Context。Context 是并发安全的，所以可以放心的在 Goroutines 之间传递。</p>
+<p>在Golang并发编程中，内存泄露和一些注意事项是需要特别关注的，以下是常见的情况和建议：</p>
+<h1 id="常见内存泄露及注意事项"><a href="#常见内存泄露及注意事项" class="headerlink" title="常见内存泄露及注意事项"></a>常见内存泄露及注意事项</h1><ol>
+<li><p><strong>goroutine泄露</strong></p>
+<ul>
+<li><strong>场景</strong>：goroutine因阻塞（如未关闭的channel、死循环）无法退出，导致内存泄露。每个goroutine占用2KB内存，大量goroutine泄露会造成内存占用持续增加。</li>
+<li><strong>原因</strong>：goroutine在执行时被阻塞而无法退出，如未关闭的channel导致接收方一直等待。</li>
+<li><strong>避免</strong>：确保goroutine有明确的退出机制，如使用<code>context.Context</code>传递取消信号，关闭channel通知协程退出。</li>
+</ul>
+</li>
+<li><p><strong>time.Ticker未关闭</strong></p>
+<ul>
+<li><strong>场景</strong>：time.Ticker每间隔指定时间向通道写数据，若不调用<code>Stop()</code>方法，会一直占用内存。</li>
+<li><strong>避免</strong>：在使用完time.Ticker后，务必调用<code>Stop()</code>方法来停止它。</li>
+</ul>
+</li>
+<li><p><strong>字符串和切片截取</strong></p>
+<ul>
+<li><strong>场景</strong>：长字符串或切片被截取后，如果截取的小部分还在活跃，原大块内存将无法被回收，导致临时内存泄露。</li>
+<li><strong>避免</strong>：在不需要保留原大块内存时，可以复制需要的部分到新的变量，或者使用其他方式避免共享底层数组。</li>
+</ul>
+</li>
+<li><p><strong>Finalizer导致泄漏</strong></p>
+<ul>
+<li><strong>场景</strong>：设置Finalizer后，对象的内存无法被垃圾回收器及时回收，尤其当存在循环引用时。</li>
+<li><strong>避免</strong>：谨慎使用Finalizer，避免不必要的循环引用。</li>
+</ul>
+</li>
+<li><p><strong>Deferring Function Call导致泄漏</strong></p>
+<ul>
+<li><strong>场景</strong>：大量文件打开后仅在函数结束时释放，造成临时内存泄露。</li>
+<li><strong>避免</strong>：在循环中打开文件时，应立即关闭，而不是等待函数结束。</li>
+</ul>
+</li>
+<li><p><strong>内存分配未释放</strong></p>
+<ul>
+<li><strong>场景</strong>：持续分配内存但未释放，如持续向切片中添加数据而未清理。</li>
+<li><strong>避免</strong>：合理管理内存分配和释放，避免不必要的内存堆积。</li>
+</ul>
+</li>
+<li><p><strong>大数组作为参数</strong></p>
+<ul>
+<li><strong>场景</strong>：大数组作为形参时，值拷贝导致内存使用激增。</li>
+<li><strong>避免</strong>：对于大数组，使用切片或指针传递，减少内存占用。</li>
+</ul>
+</li>
+</ol>
+<h2 id="注意事项-2"><a href="#注意事项-2" class="headerlink" title="注意事项"></a>注意事项</h2><ol>
+<li><p><strong>并发安全与同步</strong></p>
+<ul>
+<li>共享资源需用<code>sync.Mutex</code>、<code>sync.RWMutex</code>或原子操作保护，优先使用Channel传递数据，避免直接共享内存。</li>
+</ul>
+</li>
+<li><p><strong>控制并发量</strong></p>
+<ul>
+<li>避免无限制创建协程，使用带缓冲的Channel、Worker Pool或信号量限制并发数。</li>
+</ul>
+</li>
+<li><p><strong>处理协程错误</strong></p>
+<ul>
+<li>在goroutine内部使用<code>defer</code>+<code>recover</code>处理<code>panic</code>，避免整个程序崩溃。</li>
+</ul>
+</li>
+<li><p><strong>避免Channel死锁</strong></p>
+<ul>
+<li>确保Channel的发送和接收成对出现，避免协程永久阻塞，如未关闭的Channel可能导致接收方等待。</li>
+</ul>
+</li>
+<li><p><strong>利用Context传递元数据和取消信号</strong></p>
+<ul>
+<li>使用<code>context.Context</code>传递元数据和取消信号，方便控制goroutine的生命周期。</li>
+</ul>
+</li>
+<li><p><strong>合理使用锁</strong></p>
+<ul>
+<li>避免在持有锁的情况下调用可能导致阻塞的操作，如I&#x2F;O操作，防止死锁。</li>
+</ul>
+</li>
+<li><p><strong>监控和分析</strong></p>
+<ul>
+<li>使用<code>runtime.MemStats</code>监控内存使用情况，使用<code>pprof</code>进行性能分析，及时发现和解决内存和性能问题。</li>
+</ul>
+</li>
+</ol>
+<p>通过遵循以上建议和注意事项，可以有效避免Golang并发编程中的内存泄露问题，编写出高效、稳定的并发程序。</p>
+
+</article>
+    
+    <div class="trm-reward">
+        
+            <span class="trm-reward-btn trm-glow" onclick='var qr = document.getElementById("qr"); qr.style.display = (qr.style.display === "none") ? "block" : "none";'>
+                <i class="iconfont fas fa-hand-holding-usd"></i>
+            </span>
+        
+        <p class="trm-reward-comment">赠人玫瑰，手有余香。</p>
+        <div id="qr" style="display:none;">
+            
+                <div style="display:inline-block">
+                    <a rel="noopener noreferrer" href='https://i.328888.xyz/2023/04/22/i5cWsV.md.jpeg' target='_blank' >
+                       <img src="https://i.328888.xyz/2023/04/22/i5cWsV.md.jpeg" alt="支付宝" loading="lazy">
+                    </a>
+                    <p>支付宝</p>
+                </div>
+            
+                <div style="display:inline-block">
+                    <a rel="noopener noreferrer" href='https://i.328888.xyz/2023/04/22/i5c0fd.th.jpeg' target='_blank' >
+                       <img src="https://i.328888.xyz/2023/04/22/i5c0fd.th.jpeg" alt="微信" loading="lazy">
+                    </a>
+                    <p>微信</p>
+                </div>
+            
+        </div>
+    </div>
+
+    
+
+<ul class="trm-post-copyright">
+    <li class="trm-post-copyright-author">
+        <strong>Post author: </strong>
+        贺同学
+    </li>
+    <li class="trm-post-copyright-link">
+        <strong>Post link: </strong>
+        <a id="original-link" href="https://herongwei.me/2025/03/28/Golang-并发编程实战总结/" title="Golang 并发编程实战总结">https://herongwei.me/2025/03/28/Golang-并发编程实战总结/</a>
+    </li>
+    <li class="trm-post-copyright-license">
+        <strong>Copyright Notice: </strong>
+        All articles in this blog are licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" target="_blank" rel="noopener" title="CC BY-NC-SA 4.0 ">CC BY-NC-SA 4.0</a> unless otherwise stated.
+    </li>
+</ul>
+
+
+</div>
+<div id="post-next-prev" class="row">
+    <div class="col-lg-12">
+        <!-- title -->
+        <h5 class="trm-title-with-divider">
+            Other Articles
+            <span data-number="02"></span>
+        </h5>
+    </div>
+    
+    
+        <div class="col-lg-6">
+    <div class="trm-blog-card trm-scroll-animation" data-scroll data-scroll-offset="40">
+        <a href="/2025/03/24/Rust-%E9%AB%98%E6%80%A7%E8%83%BD%E5%8E%9F%E5%9B%A0%E8%A7%A3%E6%9E%90/" class="trm-cover-frame trm-anima-link">
+            
+            
+                <img alt="cover" class="no-fancybox" src="/img/block.jpg">
+            
+        </a>
+        
+        <div class="trm-card-descr">
+            <div class="trm-label trm-category trm-mb-20">
+                <a href=" /categories/%E5%8D%9A%E5%AE%A2/">
+                    博客
+                </a>
+            </div>
+            <h5>
+                <a href="/2025/03/24/Rust-%E9%AB%98%E6%80%A7%E8%83%BD%E5%8E%9F%E5%9B%A0%E8%A7%A3%E6%9E%90/" class="trm-anima-link">
+                    Rust 高性能原因解析
+                </a>
+            </h5>
+            <div class="trm-divider trm-mb-20 trm-mt-20"></div>
+            <ul class="trm-card-data trm-label">
+                <li>25/03/24</li>
+                <li>18:07</li>
+                
+                
+            </ul>
+        </div>
+    </div>
+</div>
+    
+</div>
+
+    
+
+
+
+                    <div class="trm-divider footer-divider"></div>
+
+                    <!-- footer -->
+                    <footer class="trm-scroll-animation" data-scroll data-scroll-offset="50">
+
+    
+
+    
+        <div class="trm-footer-item">
+            <span>© 2023- 2025</span>
+            <span class="footer-separator"data-separator=" · "></span>
+            <span class="trm-accent-color">程序员贺同学</span>
+        </div>
+    
+
+    
+        <div class="trm-footer-item">
+            <span>
+                Powered by <a href="https://hexo.io" target="_blank" rel="noopener">Hexo</a> v6.3.0
+            </span>
+            <span class="footer-separator" data-separator=" | "></span>
+            <span> 
+                Theme - 
+                <a rel="noopener" href='https://github.com/MaLuns/hexo-theme-async' target='_blank'>Async</a>
+                v2.0.8
+            </span>
+        </div>
+      
+
+    
+        <div class="trm-footer-item">
+            The blog has been lovely to run <span id="since" class="trm-accent-color"></span> day
+        </div>
+     
+
+     
+</footer>
+
+<script>
+    function show_date_time () {
+        var BirthDay = new Date("04/10/2023 17:00:00");
+        var today = new Date();
+        var timeold = (today.getTime() - BirthDay.getTime());
+        var msPerDay = 24 * 60 * 60 * 1000
+        var day = Math.floor(timeold / msPerDay)
+        since.innerHTML = day
+    }
+    show_date_time()
+</script>
+ 
+                    <!-- footer end -->
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+            <!-- body end -->
+
+            <div class="trm-fixed-container" data-scroll data-scroll-sticky data-scroll-target=".locomotive-scroll__sticky-target" data-scroll-offset="-10">
+    
+        <div class="trm-fixed-btn" data-title="Read Mode" onclick="asyncFun.switchReadMode()">
+            <i class="iconfont fas fa-book-reader"></i>
+        </div>
+    
+    
+    <div id="trm-back-top" class="trm-fixed-btn" data-title="Back To Top">
+        <i class="iconfont fas fa-arrow-up"></i>
+    </div>
+</div>
+          </div>
+        </div>
+      </div>
+      <!-- scroll container end -->
+
+  </div>
+  <!-- app wrapper end -->
+
+  
+  <!-- Plugin -->
+
+
+
+
+    
+    
+<script src="https://cdn.jsdelivr.net/npm/locomotive-scroll@4.1.4/dist/locomotive-scroll.min.js"></script>
+
+    
+<script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui@4.0/dist/fancybox.umd.js"></script>
+
+    
+
+    
+        <script src="https://cdn.jsdelivr.net/npm/hexo-theme-async@2.0.8/source/js/plugins/typing.js?v=2.0.8"></script>
+    
+
+    
+
+    <!-- 数学公式 -->
+    
+
+    <!-- 评论插件 -->
+    
+        
+
+        
+    
+
+
+
+<!-- CDN -->
+
+
+    
+
+    
+
+    
+
+
+
+
+    <!-- Service Worker -->
+    
+    <!-- baidu push -->
+    
+
+
+<script id="async-script" src="https://cdn.jsdelivr.net/npm/hexo-theme-async@2.0.8/source/js/main.js?v=2.0.8"></script>
+
+</body>
+
+</html>
